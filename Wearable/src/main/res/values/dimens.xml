@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="hr_min_text_size">45dp</dimen>
+    <dimen name="hr_min_text_size_round">45dp</dimen>
+    <dimen name="seconds_text_size">25dp</dimen>
+    <dimen name="colon_text_size">30dp</dimen>
+    <dimen name="steps_or_distance_text_size">17dp</dimen>
+    <dimen name="ocodo_logo_text_size">14dp</dimen>
+    <dimen name="am_pm_size">12dp</dimen>
+    <dimen name="am_pm_size_round">12dp</dimen>
+    <dimen name="x_offset">15dp</dimen>
+    <dimen name="x_offset_round">25dp</dimen>
+    <dimen name="steps_or_distance_x_offset">25dp</dimen>
+    <dimen name="steps_or_distance_x_offset_round">25dp</dimen>
+    <dimen name="y_offset">123dp</dimen>
+    <dimen name="line_height">18dp</dimen>
+</resources>

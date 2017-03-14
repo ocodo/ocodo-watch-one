@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#191620</color>
+    <color name="dark_fg">#1a1818</color>
+    <color name="light_bg">#d9d6d1</color>
+    <color name="hours">#DAD0BD</color>
+    <color name="mins">#DAD0BD</color>
+    <color name="seconds">#9A9185</color>
+    <color name="second_hand">#8c272c</color>
+    <color name="am_pm">#9A9185</color>
+    <color name="colon">#666058</color>
+    <color name="step_count">#017483</color>
+</resources>

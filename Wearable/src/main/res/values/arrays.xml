@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="complication_simple_names">
+        <item>Left dial</item>
+        <item>Right dial</item>
+    </string-array>
+    <array name="complication_simple_icons">
+        <item>@drawable/complications_left_dial</item>
+        <item>@drawable/complications_right_dial</item>
+    </array>
+</resources>
