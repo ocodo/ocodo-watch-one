@@ -2,15 +2,17 @@
 <resources>
     <string name="app_name">Ocodo Watches</string>
     <string name="ocodo_watch_zero_name">Ocodo Zero</string>
-    <string name="ocodo_watch_one_name">Ocodo One</string>
-    <string name="ocodo_watch_two_name">Ocodo Two</string>
-    <string name="ocodo_watch_three_name">Ocodo Three</string>
-    <string name="ocodo_watch_four_name">Ocodo Four</string>
     <string name="ocodo_zero_logo_text">ocodo zero</string>
+    <string name="ocodo_watch_one_name">Ocodo One</string>
     <string name="ocodo_one_logo_text">ocodo one</string>
+    <string name="ocodo_watch_two_name">Ocodo Two</string>
     <string name="ocodo_two_logo_text">ocodo two</string>
+    <string name="ocodo_watch_three_name">Ocodo Three</string>
     <string name="ocodo_three_logo_text">ocodo three</string>
+    <string name="ocodo_watch_four_name">Ocodo Four</string>
     <string name="ocodo_four_logo_text">ocodo four</string>
+    <string name="ocodo_watch_five_name">Ocodo five</string>
+    <string name="ocodo_five_logo_text">ocodo five</string>
     <string name="am_text">am</string>
     <string name="pm_text">pm</string>
     <string name="steps_text">%s steps</string>
