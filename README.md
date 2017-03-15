@@ -27,3 +27,6 @@ Coming to the Play Store when I get around to it :)
 ## ocodo five
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_five.png)
+
+![](./Wearable/src/main/assets/on-device.jpg)
+
