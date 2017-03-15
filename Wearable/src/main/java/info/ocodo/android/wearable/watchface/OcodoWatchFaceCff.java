@@ -156,7 +156,7 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             mStepCountPaint.setTextSize(20);
             mStepCountPaint.setTextAlign(Paint.Align.CENTER);
             mHourTextPaint = createTextPaint(DARK_HANDS, normalTypeface);
-            mHourTextPaint.setTextSize(45);
+            mHourTextPaint.setTextSize(60);
             mHourTextPaint.setTextAlign(Paint.Align.CENTER);
             mCalendar = Calendar.getInstance();
         }
@@ -249,13 +249,9 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
 
             drawHourDigits(canvas);
 
-            float ocodoTextYOffset = 120f;
-            canvas.drawText(getString(string.ocodo_cff_logo_text), mWidth / 2, ocodoTextYOffset, mOcodoTextPaint);
+            drawWatchName(canvas);
 
-            @SuppressLint("SimpleDateFormat")
-            String date = new SimpleDateFormat("dd MMM").format(new Date()).toUpperCase();
-            float mDateOffsetY = mHeight * 0.7f;
-            canvas.drawText(date, mWidth / 2, mDateOffsetY, mOcodoTextPaint);
+            drawDayMonthDate(canvas);
 
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
@@ -263,29 +259,41 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             final float hourHandOffset = mCalendar.get(Calendar.MINUTE) / 2f;
             final float hoursRotation = (mCalendar.get(Calendar.HOUR) * 30) + hourHandOffset;
 
-            if (!isInAmbientMode()) {
-                DecimalFormat df = new DecimalFormat("###,###");
-                String stepString = getString(string.steps_text, df.format(mStepsTotal));
-                float stepsYOffset = mHeight * 0.76f;
-                canvas.drawText(stepString, mWidth / 2, stepsYOffset, mStepCountPaint);
-            }
+            drawStepsCount(canvas);
 
             updateWatchHandStyle();
 
             canvas.save();
 
-            drawClockHand(canvas, hoursRotation, mCenterX,
-                    mCenterY,
-                    mCenterY + CENTER_GAP_AND_CIRCLE_RADIUS,
-                    mCenterY - sHourHandLength,
-                    mHourHandPaint);
+            drawHours(canvas, hoursRotation);
+            drawMinutes(canvas, minutesRotation, hoursRotation);
+            drawSweepingSecondHand(canvas, minutesRotation);
 
-            drawClockHand(canvas, minutesRotation - hoursRotation, mCenterX,
-                    mCenterY,
-                    mCenterY + CENTER_GAP_AND_CIRCLE_RADIUS,
-                    mCenterY - sMinuteHandLength,
-                    mMinuteHandPaint);
+            canvas.restore();
+        }
 
+        private void drawWatchName(Canvas canvas) {
+            float ocodoTextYOffset = 120f;
+            canvas.drawText(getString(string.ocodo_cff_logo_text), mWidth / 2, ocodoTextYOffset, mOcodoTextPaint);
+        }
+
+        private void drawDayMonthDate(Canvas canvas) {
+            @SuppressLint("SimpleDateFormat")
+            String date = new SimpleDateFormat("dd MMM").format(new Date()).toUpperCase();
+            float mDateOffsetY = mHeight * 0.68f;
+            canvas.drawText(date, mWidth / 2, mDateOffsetY, mOcodoTextPaint);
+        }
+
+        private void drawStepsCount(Canvas canvas) {
+            if (!isInAmbientMode()) {
+                DecimalFormat df = new DecimalFormat("###,###");
+                String stepString = getString(string.steps_text, df.format(mStepsTotal));
+                float stepsYOffset = mHeight * 0.75f;
+                canvas.drawText(stepString, mWidth / 2, stepsYOffset, mStepCountPaint);
+            }
+        }
+
+        private void drawSweepingSecondHand(Canvas canvas, float minutesRotation) {
             if (!isInAmbientMode()) {
                 final float milliseconds = ((mCalendar.get(Calendar.SECOND) * 1000) +
                         mCalendar.get(Calendar.MILLISECOND));
@@ -297,8 +305,22 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                         mCenterY - mSecondHandLength,
                         mSecondHandPaint);
             }
+        }
 
-            canvas.restore();
+        private void drawHours(Canvas canvas, float hoursRotation) {
+            drawClockHand(canvas, hoursRotation, mCenterX,
+                    mCenterY,
+                    mCenterY + CENTER_GAP_AND_CIRCLE_RADIUS,
+                    mCenterY - sHourHandLength,
+                    mHourHandPaint);
+        }
+
+        private void drawMinutes(Canvas canvas, float minutesRotation, float hoursRotation) {
+            drawClockHand(canvas, minutesRotation - hoursRotation, mCenterX,
+                    mCenterY,
+                    mCenterY + CENTER_GAP_AND_CIRCLE_RADIUS,
+                    mCenterY - sMinuteHandLength,
+                    mMinuteHandPaint);
         }
 
         private String formatTwoDigitNumber(int hour) {
