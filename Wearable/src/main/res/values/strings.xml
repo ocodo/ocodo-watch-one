@@ -13,7 +13,14 @@
     <string name="ocodo_four_logo_text">ocodo four</string>
     <string name="ocodo_watch_five_name">Ocodo five</string>
     <string name="ocodo_five_logo_text">ocodo five</string>
+    <string name="ocodo_watch_cff_name">Ocodo Swiss</string>
+    <string name="ocodo_cff_logo_text">ocodo swiss</string>
     <string name="am_text">am</string>
     <string name="pm_text">pm</string>
     <string name="steps_text">%s steps</string>
+    <string name="twelve">12</string>
+    <string name="three">3</string>
+    <string name="six">6</string>
+    <string name="nine">9</string>
+
 </resources>
