@@ -13,19 +13,36 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.fitness.Fitness;
+import com.google.android.gms.fitness.FitnessStatusCodes;
+import com.google.android.gms.fitness.data.DataPoint;
+import com.google.android.gms.fitness.data.DataType;
+import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.result.DailyTotalResult;
+
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import static info.ocodo.android.wearable.watchface.R.dimen;
 import static info.ocodo.android.wearable.watchface.R.string;
+import static java.lang.String.format;
 
 public class OcodoWatchFaceCff extends CanvasWatchFaceService {
 
@@ -36,7 +53,10 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
         return new Engine();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    private class Engine extends CanvasWatchFaceService.Engine implements
+            GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener,
+            ResultCallback<DailyTotalResult> {
 
         private static final float HOUR_HAND_THICKNESS = 18f;
         private static final float MINUTE_HAND_THICKNESS = 14f;
@@ -60,8 +80,6 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                 }
             }
         };
-        private float mOcodoWidth;
-        private float mOcodoCentering;
         private boolean mLowBitAmbient;
         private float secondHandLengthPercent = 1.0f;
         private float secondHandCenterOffsetPercent = 0.78f;
@@ -92,6 +110,11 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
         private Paint mHourTickPaint;
         private Calendar mCalendar;
 
+        private GoogleApiClient mGoogleApiClient;
+        private boolean mStepsRequested;
+        private Paint mStepCountPaint;
+        private int mStepsTotal = 0;
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -112,6 +135,15 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             lightTypeface = Typeface.createFromAsset(getAssets(), "gothamrnd-light.ttf");
             normalTypeface = Typeface.createFromAsset(getAssets(), "helvetica-75-bold.ttf");
 
+            mStepsRequested = false;
+            mGoogleApiClient = new GoogleApiClient.Builder(OcodoWatchFaceCff.this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(Fitness.HISTORY_API)
+                    .addApi(Fitness.RECORDING_API)
+                    .useDefaultAccount()
+                    .build();
+
             setWatchFaceStyle(new WatchFaceStyle.Builder(OcodoWatchFaceCff.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
@@ -119,10 +151,13 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                     .build());
 
             mOcodoTextPaint = createTextPaint(DARK_HANDS, lightTypeface);
+            mOcodoTextPaint.setTextAlign(Paint.Align.CENTER);
+            mStepCountPaint = createTextPaint(DARK_HANDS, lightTypeface);
+            mStepCountPaint.setTextSize(20);
+            mStepCountPaint.setTextAlign(Paint.Align.CENTER);
             mHourTextPaint = createTextPaint(DARK_HANDS, normalTypeface);
             mHourTextPaint.setTextSize(45);
             mHourTextPaint.setTextAlign(Paint.Align.CENTER);
-
             mCalendar = Calendar.getInstance();
         }
 
@@ -155,8 +190,6 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             super.onApplyWindowInsets(insets);
             Resources resources = getResources();
             mOcodoTextPaint.setTextSize(resources.getDimension(dimen.ocodo_logo_text_size));
-            mOcodoWidth = mOcodoTextPaint.measureText(resources.getString(string.ocodo_cff_logo_text));
-            mOcodoCentering = (mWidth / 2f) - (mOcodoWidth / 2);
         }
 
         @Override
@@ -217,19 +250,25 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             drawHourDigits(canvas);
 
             float ocodoTextYOffset = 120f;
-            canvas.drawText(getString(string.ocodo_cff_logo_text), mOcodoCentering, ocodoTextYOffset, mOcodoTextPaint);
+            canvas.drawText(getString(string.ocodo_cff_logo_text), mWidth / 2, ocodoTextYOffset, mOcodoTextPaint);
 
             @SuppressLint("SimpleDateFormat")
             String date = new SimpleDateFormat("dd MMM").format(new Date()).toUpperCase();
-            float dateWidth = mOcodoTextPaint.measureText(date);
             float mDateOffsetY = mHeight * 0.7f;
-            canvas.drawText(date, (mWidth / 2) - (dateWidth / 2), mDateOffsetY + 8, mOcodoTextPaint);
+            canvas.drawText(date, mWidth / 2, mDateOffsetY, mOcodoTextPaint);
 
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
             final float minutesRotation = mCalendar.get(Calendar.MINUTE) * 6f;
             final float hourHandOffset = mCalendar.get(Calendar.MINUTE) / 2f;
             final float hoursRotation = (mCalendar.get(Calendar.HOUR) * 30) + hourHandOffset;
+
+            if (!isInAmbientMode()) {
+                DecimalFormat df = new DecimalFormat("###,###");
+                String stepString = getString(string.steps_text, df.format(mStepsTotal));
+                float stepsYOffset = mHeight * 0.76f;
+                canvas.drawText(stepString, mWidth / 2, stepsYOffset, mStepCountPaint);
+            }
 
             updateWatchHandStyle();
 
@@ -260,6 +299,10 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             }
 
             canvas.restore();
+        }
+
+        private String formatTwoDigitNumber(int hour) {
+            return format("%02d", hour);
         }
 
         private void drawClockHand(Canvas canvas, float hoursRotation, float mCenterX, float mCenterY,
@@ -400,6 +443,86 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             }
             mRegisteredReceiver = false;
             OcodoWatchFaceCff.this.unregisterReceiver(mReceiver);
+        }
+
+        @Override
+        public void onConnected(@Nullable Bundle connectionHint) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "mGoogleApiAndFitCallbacks.onConnected: " + connectionHint);
+            }
+            mStepsRequested = false;
+            subscribeToSteps();
+            getTotalSteps();
+        }
+
+        private void getTotalSteps() {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "getTotalSteps()");
+            }
+
+            if ((mGoogleApiClient != null)
+                    && (mGoogleApiClient.isConnected())
+                    && (!mStepsRequested)) {
+
+                mStepsRequested = true;
+
+                PendingResult<DailyTotalResult> stepsResult =
+                        Fitness.HistoryApi.readDailyTotal(
+                                mGoogleApiClient,
+                                DataType.TYPE_STEP_COUNT_DELTA);
+
+                stepsResult.setResultCallback(this);
+            }
+        }
+
+        private void subscribeToSteps() {
+            Fitness.RecordingApi.subscribe(mGoogleApiClient, DataType.TYPE_STEP_COUNT_DELTA)
+                    .setResultCallback(new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(Status status) {
+                            if (status.isSuccess()) {
+                                if (status.getStatusCode()
+                                        == FitnessStatusCodes.SUCCESS_ALREADY_SUBSCRIBED) {
+                                    Log.i(TAG, "Existing subscription for activity detected.");
+                                } else {
+                                    Log.i(TAG, "Successfully subscribed!");
+                                }
+                            } else {
+                                Log.i(TAG, "There was a problem subscribing.");
+                            }
+                        }
+                    });
+        }
+
+        @Override
+        public void onConnectionSuspended(int cause) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "mGoogleApiAndFitCallbacks.onConnectionSuspended: " + cause);
+            }
+        }
+
+        @Override
+        public void onConnectionFailed(ConnectionResult result) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "mGoogleApiAndFitCallbacks.onConnectionFailed: " + result);
+            }
+        }
+
+        @Override
+        public void onResult(DailyTotalResult dailyTotalResult) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "mGoogleApiAndFitCallbacks.onResult(): " + dailyTotalResult);
+            }
+            mStepsRequested = false;
+            if (dailyTotalResult.getStatus().isSuccess()) {
+                List<DataPoint> points = dailyTotalResult.getTotal().getDataPoints();
+                if (!points.isEmpty()) {
+                    mStepsTotal = points.get(0).getValue(Field.FIELD_STEPS).asInt();
+                    Log.d(TAG, "steps updated: " + mStepsTotal);
+                }
+            } else {
+                Log.e(TAG, "onResult() failed! " + dailyTotalResult.getStatus().getStatusMessage());
+            }
         }
     }
 }
