@@ -1,6 +1,8 @@
 # ocodo watch series one
 
-A collection of five android wear watch faces.
+A collection of six android wear watch faces.
+Install from Android Studio for now.
+Coming to the Play Store when I get around to it :)
 
 ## ocodo zero
 
