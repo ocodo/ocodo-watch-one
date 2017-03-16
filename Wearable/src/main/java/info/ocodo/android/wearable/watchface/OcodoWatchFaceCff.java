@@ -174,10 +174,14 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             }
             super.onVisibilityChanged(visible);
             if (visible) {
+                mGoogleApiClient.connect();
                 registerReceiver();
                 mCalendar.setTimeZone(TimeZone.getDefault());
             } else {
                 unregisterReceiver();
+                if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                    mGoogleApiClient.disconnect();
+                }
             }
             updateTimer();
         }
@@ -260,7 +264,6 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             final float hoursRotation = (mCalendar.get(Calendar.HOUR) * 30) + hourHandOffset;
 
             drawStepsCount(canvas);
-
             updateWatchHandStyle();
 
             canvas.save();
