@@ -31,3 +31,7 @@ Coming to the Play Store when I get around to it :)
 ## ocodo helvetia
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_cff.png)
+
+## ocodo six
+
+![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_six.png)
