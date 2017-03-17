@@ -1,7 +1,9 @@
 # ocodo watch series one
 
-A collection of six android wear watch faces.
-Install from Android Studio for now.
+A collection of watch faces for Android Wear 2.0
+
+They can only be installed from Android Studio (debug build) for now.
+
 Coming to the Play Store when I get around to it :)
 
 ## ocodo zero
