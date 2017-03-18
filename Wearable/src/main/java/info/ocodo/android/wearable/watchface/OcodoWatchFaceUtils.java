@@ -34,7 +34,6 @@ public class OcodoWatchFaceUtils {
     static void drawTickingSecondHand(Canvas canvas, float minutesRotation, Calendar calendar, float centerX, float centerY, int width,
                                       float centerOffsetPercent, float handLength, Paint handPaint) {
         final float secondsRotation = calendar.get(Calendar.SECOND) * 6f;
-
         drawClockHand(canvas, secondsRotation - minutesRotation, centerX,
                 centerY,
                 centerY - ((width / 2) * centerOffsetPercent),
