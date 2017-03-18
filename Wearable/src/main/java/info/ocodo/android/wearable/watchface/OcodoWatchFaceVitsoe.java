@@ -48,6 +48,7 @@ import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawRepe
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawRepeatingTicks;
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawStepsCount;
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawSweepingSecondHand;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawTickingSecondHand;
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawWatchName;
 import static info.ocodo.android.wearable.watchface.R.string;
 
@@ -341,7 +342,7 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
 
             canvas.drawCircle(mCenterX, mCenterY, 22, mCenterCirclePaint);
 
-            if (!isInAmbientMode()) drawSweepingSecondHand(canvas, minutesRotation, mCalendar,
+            if (!isInAmbientMode()) drawTickingSecondHand(canvas, minutesRotation, mCalendar,
                     mCenterX, mCenterY, mWidth, SECOND_HAND_CENTER_OFFSET_PERCENT,
                     mSecondHandLength, mSecondHandPaint);
 

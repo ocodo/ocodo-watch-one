@@ -31,7 +31,19 @@ public class OcodoWatchFaceUtils {
         canvas.drawText(formattedStepString, x, y, paint);
     }
 
-    static void drawSweepingSecondHand(Canvas canvas, float minutesRotation, Calendar calendar, float centerX, float centerY, int width, float centerOffsetPercent, float handLength, Paint handPaint) {
+    static void drawTickingSecondHand(Canvas canvas, float minutesRotation, Calendar calendar, float centerX, float centerY, int width,
+                                      float centerOffsetPercent, float handLength, Paint handPaint) {
+        final float secondsRotation = calendar.get(Calendar.SECOND) * 6f;
+
+        drawClockHand(canvas, secondsRotation - minutesRotation, centerX,
+                centerY,
+                centerY - ((width / 2) * centerOffsetPercent),
+                centerY - handLength,
+                handPaint);
+    }
+
+    static void drawSweepingSecondHand(Canvas canvas, float minutesRotation, Calendar calendar, float centerX, float centerY, int width,
+                                       float centerOffsetPercent, float handLength, Paint handPaint) {
         final float milliseconds = ((calendar.get(Calendar.SECOND) * 1000) +
                 calendar.get(Calendar.MILLISECOND));
         final float secondsRotation = milliseconds * 0.006f;
