@@ -22,9 +22,10 @@ Coming to the Play Store when I get around to it :)
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_three.png)
 
-The following are inspired by Mondaine / CFF (Swiss Railway Clocks)
 
 ## ocodo four
+
+The following four faces are inspired by Mondaine / CFF (Swiss Railway Clocks)
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_four.png)
 
@@ -40,8 +41,13 @@ The following are inspired by Mondaine / CFF (Swiss Railway Clocks)
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_six.png)
 
-Inspired by Dieter Rams (Braun) clock designs
 
 ## ocodo vitsoe
 
+Inspired by Dieter Rams (Braun) clock designs
+
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_vitsoe.png)
+
+## ocodo vitsoe dark
+
+![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_vitsoe_dark.png)
