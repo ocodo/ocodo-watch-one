@@ -16,6 +16,7 @@ import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
@@ -154,6 +155,7 @@ public class OcodoWatchFaceFive extends CanvasWatchFaceService {
             normalTypeface = Typeface.createFromAsset(getAssets(), "gothamrnd-light.ttf");
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(OcodoWatchFaceFive.this)
+                    .setStatusBarGravity(Gravity.CENTER)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)

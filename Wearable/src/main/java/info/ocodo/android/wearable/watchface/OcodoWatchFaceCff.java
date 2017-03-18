@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
@@ -156,6 +157,7 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                     .build();
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(OcodoWatchFaceCff.this)
+                    .setStatusBarGravity(Gravity.CENTER)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)

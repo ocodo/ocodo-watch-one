@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
@@ -69,7 +70,13 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
         private static final float MINUTE_TICKS_THICKNESS = 4f;
         private static final float HOUR_TICKS_THICKNESS = 10f;
         private static final float CENTER_GAP_AND_CIRCLE_RADIUS = 0f;
+        private static final float SECOND_HAND_LENGTH_PERCENT = 0.87f;
+        private static final float SECOND_HAND_CENTER_OFFSET_PERCENT = -0.23f;
+        private static final float MINUTE_HAND_LENGTH_PERCENT = 0.84f;
+        private static final float HOUR_HAND_LENGTH_PERCENT = 0.63f;
         private static final int MSG_UPDATE_TIME = 0;
+        private static final long DRAW_UPDATE_TIME = 50L;
+
         private final Handler mUpdateTimeHandler = new Handler() {
             @Override
             public void handleMessage(Message message) {
@@ -80,17 +87,14 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
                         }
                         invalidate();
                         if (shouldUpdateTimeHandlerBeRunning()) {
-                            mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, 50L);
+                            mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, DRAW_UPDATE_TIME);
                         }
                         break;
                 }
             }
         };
+
         private boolean mLowBitAmbient;
-        private float secondHandLengthPercent = 0.87f;
-        private float secondHandCenterOffsetPercent = -0.23f;
-        private float minuteHandLengthPercent = 0.84f;
-        private float hourHandLengthPercent = 0.63f;
         private int mWidth;
         private int mHeight;
         private int LIGHT_BG = getResources().getColor(R.color.light_bg);
@@ -128,6 +132,7 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
         private Paint mStepCountPaint;
         private int mStepsTotal = 0;
         private Paint mCenterCirclePaint;
+        private Paint mOuterCenterCirclePaint;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -138,10 +143,12 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
             super.onCreate(holder);
 
             mCenterCirclePaint = new Paint();
-            mCenterCirclePaint.setStrokeWidth(0);
             mCenterCirclePaint.setAntiAlias(true);
-            mCenterCirclePaint.setStyle(Paint.Style.FILL_AND_STROKE);
             mCenterCirclePaint.setColor(DARK_HANDS);
+
+            mOuterCenterCirclePaint = new Paint();
+            mOuterCenterCirclePaint.setColor(LIGHT_BG);
+            mOuterCenterCirclePaint.setAntiAlias(true);
 
             mWatchHandColor = DARK_HANDS;
 
@@ -171,6 +178,7 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
                     .build();
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(OcodoWatchFaceVitsoe.this)
+                    .setStatusBarGravity(Gravity.CENTER)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
@@ -267,9 +275,9 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
             mCenterY = height / 2f;
             mWidth = width;
             mHeight = height;
-            mSecondHandLength = mCenterX * secondHandLengthPercent;
-            sMinuteHandLength = mCenterX * minuteHandLengthPercent;
-            sHourHandLength = mCenterX * hourHandLengthPercent;
+            mSecondHandLength = mCenterX * SECOND_HAND_LENGTH_PERCENT;
+            sMinuteHandLength = mCenterX * MINUTE_HAND_LENGTH_PERCENT;
+            sHourHandLength = mCenterX * HOUR_HAND_LENGTH_PERCENT;
         }
 
         @Override
@@ -329,16 +337,12 @@ public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
                     mCenterY - sMinuteHandLength,
                     mMinuteHandPaint);
 
-            Paint outerCenterCirclePaint = new Paint();
-            outerCenterCirclePaint.setColor(LIGHT_BG);
-            outerCenterCirclePaint.setAntiAlias(true);
-
-            canvas.drawCircle(mCenterX, mCenterY, 28, outerCenterCirclePaint);
+            canvas.drawCircle(mCenterX, mCenterY, 28, mOuterCenterCirclePaint);
 
             canvas.drawCircle(mCenterX, mCenterY, 22, mCenterCirclePaint);
 
             if (!isInAmbientMode()) drawSweepingSecondHand(canvas, minutesRotation, mCalendar,
-                    mCenterX, mCenterY, mWidth, secondHandCenterOffsetPercent,
+                    mCenterX, mCenterY, mWidth, SECOND_HAND_CENTER_OFFSET_PERCENT,
                     mSecondHandLength, mSecondHandPaint);
 
             canvas.restore();
