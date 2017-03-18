@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -31,6 +32,7 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.result.DailyTotalResult;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
@@ -46,12 +48,11 @@ import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawRepe
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawStepsCount;
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawSweepingSecondHand;
 import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawWatchName;
-import static info.ocodo.android.wearable.watchface.R.dimen;
 import static info.ocodo.android.wearable.watchface.R.string;
 
-public class OcodoWatchFaceCff extends CanvasWatchFaceService {
+public class OcodoWatchFaceVitsoe extends CanvasWatchFaceService {
 
-    private static final String TAG = "OcodoWatchFaceCff";
+    private static final String TAG = "OcodoWatchFaceVitsoe";
 
     @Override
     public Engine onCreateEngine() {
@@ -63,11 +64,11 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             GoogleApiClient.OnConnectionFailedListener,
             ResultCallback<DailyTotalResult> {
 
-        private static final float HOUR_HAND_THICKNESS = 18f;
+        private static final float HOUR_HAND_THICKNESS = 22f;
         private static final float MINUTE_HAND_THICKNESS = 14f;
-        private static final float SECOND_TICKS_THICKNESS = 10f;
-        private static final float CENTER_GAP_AND_CIRCLE_RADIUS = 30f;
-        private static final int SHADOW_RADIUS = 3;
+        private static final float MINUTE_TICKS_THICKNESS = 4f;
+        private static final float HOUR_TICKS_THICKNESS = 10f;
+        private static final float CENTER_GAP_AND_CIRCLE_RADIUS = 0f;
         private static final int MSG_UPDATE_TIME = 0;
         private final Handler mUpdateTimeHandler = new Handler() {
             @Override
@@ -86,32 +87,33 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             }
         };
         private boolean mLowBitAmbient;
-        private float secondHandLengthPercent = 1.0f;
-        private float secondHandCenterOffsetPercent = 0.78f;
-        private float minuteHandLengthPercent = 0.95f;
-        private float hourHandLengthPercent = 0.70f;
+        private float secondHandLengthPercent = 0.87f;
+        private float secondHandCenterOffsetPercent = -0.23f;
+        private float minuteHandLengthPercent = 0.84f;
+        private float hourHandLengthPercent = 0.63f;
         private int mWidth;
         private int mHeight;
         private int LIGHT_BG = getResources().getColor(R.color.light_bg);
         private int DARK_HANDS = getResources().getColor(R.color.bg);
-        private int SECOND_HAND = getResources().getColor(R.color.second_hand);
         private float mCenterX;
         private float mCenterY;
         private float mSecondHandLength;
         private float sMinuteHandLength;
         private float sHourHandLength;
         private int mWatchHandColor;
-        private int mWatchHandShadowColor;
         private Typeface normalTypeface;
         private Typeface lightTypeface;
 
         private boolean mRegisteredReceiver = false;
-        private Paint mOcodoTextPaint;
+        private Paint detailTextPaint;
+        private Paint mQuartzTextPaint;
         private Paint mHourTextPaint;
+        private Paint mMinuteTextPaint;
         private Paint mHourHandPaint;
         private Paint mMinuteHandPaint;
         private Paint mSecondHandPaint;
-        private Paint mSecondsTickPaint;
+        private Paint mSecondHandTipPaint;
+        private Paint mMinuteTickPaint;
         private Paint mHourTickPaint;
         private Calendar mCalendar;
         private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -125,6 +127,7 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
         private boolean mStepsRequested;
         private Paint mStepCountPaint;
         private int mStepsTotal = 0;
+        private Paint mCenterCirclePaint;
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -134,20 +137,32 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
 
             super.onCreate(holder);
 
-            mWatchHandColor = DARK_HANDS;
-            mWatchHandShadowColor = LIGHT_BG;
+            mCenterCirclePaint = new Paint();
+            mCenterCirclePaint.setStrokeWidth(0);
+            mCenterCirclePaint.setAntiAlias(true);
+            mCenterCirclePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            mCenterCirclePaint.setColor(DARK_HANDS);
 
-            mHourHandPaint = createStrokePaint(DARK_HANDS, HOUR_HAND_THICKNESS, Paint.Style.STROKE, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-            mMinuteHandPaint = createStrokePaint(DARK_HANDS, MINUTE_HAND_THICKNESS, Paint.Style.STROKE, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-            mSecondHandPaint = createStrokePaint(SECOND_HAND, SECOND_TICKS_THICKNESS, Paint.Style.STROKE, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-            mSecondsTickPaint = createStrokePaint(DARK_HANDS, 4f, Paint.Style.STROKE, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-            mHourTickPaint = createStrokePaint(DARK_HANDS, 10f, Paint.Style.STROKE, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
+            mWatchHandColor = DARK_HANDS;
+
+            mHourHandPaint = createStrokePaint(DARK_HANDS, HOUR_HAND_THICKNESS, Paint.Style.STROKE);
+            mHourHandPaint.setStrokeCap(Paint.Cap.ROUND);
+            mMinuteHandPaint = createStrokePaint(DARK_HANDS, MINUTE_HAND_THICKNESS, Paint.Style.STROKE);
+            mMinuteHandPaint.setStrokeCap(Paint.Cap.ROUND);
+            mSecondHandPaint = createStrokePaint(DARK_HANDS, 6f, Paint.Style.STROKE);
+            mSecondHandPaint.setStrokeCap(Paint.Cap.BUTT);
+
+            mSecondHandTipPaint = createStrokePaint(Color.RED, 6f, Paint.Style.STROKE);
+            mSecondHandTipPaint.setStrokeCap(Paint.Cap.BUTT);
+
+            mMinuteTickPaint = createStrokePaint(DARK_HANDS, MINUTE_TICKS_THICKNESS, Paint.Style.STROKE);
+            mHourTickPaint = createStrokePaint(DARK_HANDS, HOUR_TICKS_THICKNESS, Paint.Style.STROKE);
 
             lightTypeface = Typeface.createFromAsset(getAssets(), "gothamrnd-light.ttf");
-            normalTypeface = Typeface.createFromAsset(getAssets(), "helvetica-75-bold.ttf");
+            normalTypeface = Typeface.createFromAsset(getAssets(), "Futura-Medium.ttf");
 
             mStepsRequested = false;
-            mGoogleApiClient = new GoogleApiClient.Builder(OcodoWatchFaceCff.this)
+            mGoogleApiClient = new GoogleApiClient.Builder(OcodoWatchFaceVitsoe.this)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(Fitness.HISTORY_API)
@@ -155,20 +170,27 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                     .useDefaultAccount()
                     .build();
 
-            setWatchFaceStyle(new WatchFaceStyle.Builder(OcodoWatchFaceCff.this)
+            setWatchFaceStyle(new WatchFaceStyle.Builder(OcodoWatchFaceVitsoe.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_VARIABLE)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .build());
 
-            mOcodoTextPaint = createTextPaint(DARK_HANDS, lightTypeface);
-            mOcodoTextPaint.setTextAlign(Paint.Align.CENTER);
+            detailTextPaint = createTextPaint(DARK_HANDS, lightTypeface);
+            detailTextPaint.setTextAlign(Paint.Align.CENTER);
             mStepCountPaint = createTextPaint(DARK_HANDS, lightTypeface);
-            mStepCountPaint.setTextSize(20);
+            mStepCountPaint.setTextSize(18);
             mStepCountPaint.setTextAlign(Paint.Align.CENTER);
             mHourTextPaint = createTextPaint(DARK_HANDS, normalTypeface);
-            mHourTextPaint.setTextSize(60);
+            mHourTextPaint.setTextSize(28);
             mHourTextPaint.setTextAlign(Paint.Align.CENTER);
+            mMinuteTextPaint = createTextPaint(DARK_HANDS, normalTypeface);
+            mMinuteTextPaint.setTextSize(12);
+            mMinuteTextPaint.setTextAlign(Paint.Align.CENTER);
+            mQuartzTextPaint = createTextPaint(DARK_HANDS, normalTypeface);
+            mQuartzTextPaint.setTextSize(8);
+            mQuartzTextPaint.setTextAlign(Paint.Align.CENTER);
+
             mCalendar = Calendar.getInstance();
         }
 
@@ -204,7 +226,7 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             }
             super.onApplyWindowInsets(insets);
             Resources resources = getResources();
-            mOcodoTextPaint.setTextSize(resources.getDimension(dimen.ocodo_logo_text_size));
+            detailTextPaint.setTextSize(16);
         }
 
         @Override
@@ -254,39 +276,44 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             canvas.drawColor(LIGHT_BG);
 
-            for (int tickIndex = 0; tickIndex < 60; tickIndex++) {
-                drawRepeatingTicks(canvas, mCenterX - 25, mCenterX - 10, tickIndex, 60, mSecondsTickPaint, true, mCenterX, mCenterY);
-            }
+            for (int tickIndex = 0; tickIndex < 60; tickIndex++)
+                drawRepeatingTicks(canvas, mCenterX * 0.82f, mCenterX * 0.87f, tickIndex, 60, mMinuteTickPaint, true, mCenterX, mCenterY);
 
-            for (int tickIndex = 0; tickIndex < 12; tickIndex++) {
-                drawRepeatingTicks(canvas, mCenterX - 45, mCenterX - 10, tickIndex, 12, mHourTickPaint, tickIndex % 3 != 0, mCenterX, mCenterY);
-            }
 
-            drawRepeatingTextDigits(canvas, new String[]{
-                    getResources().getString(string.twelve),
-                    getResources().getString(string.three),
-                    getResources().getString(string.six),
-                    getResources().getString(string.nine)
-            }, mHourTextPaint, mCenterX, mCenterY, 0.38f, 4, mCenterX - 60f);
+            for (int tickIndex = 0; tickIndex < 12; tickIndex++)
+                drawRepeatingTicks(canvas, mCenterX * 0.77f, mCenterX * 0.87f, tickIndex, 12, mHourTickPaint, true, mCenterX, mCenterY);
 
-            drawWatchName(canvas, getString(R.string.ocodo_cff_logo_text), 120f, mWidth, mOcodoTextPaint);
+            drawRepeatingTextDigits(canvas, new String[]{"12", "3", "6", "9"},
+                    mHourTextPaint, mCenterX, mCenterY, 0.38f, 4, mCenterX * 0.68f);
 
-            drawDayMonthDate(canvas, mOcodoTextPaint, mWidth * 0.5f, mHeight * 0.68f, "dd MMM");
+            List<String> minutesList = new ArrayList<>();
+            for (int i = 0;
+                 i < 12;
+                 i++) minutesList.add(Integer.toString(i * 5));
+
+            drawRepeatingTextDigits(canvas, minutesList.toArray(new String[]{}), mMinuteTextPaint,
+                    mCenterX, mCenterY, 0.40f, 12, mCenterX * 0.93f);
+
+            drawWatchName(canvas, getString(string.ocodo_vitsoe_logo_text), mCenterY * 0.52f,
+                    mWidth, mMinuteTextPaint);
+
+            drawWatchName(canvas, getString(string.ocodo_vitsoe_quartz_text), mCenterY * 0.57f,
+                    mWidth, mQuartzTextPaint);
+
+            drawDayMonthDate(canvas, mStepCountPaint, mWidth * 0.5f, mHeight * 0.70f, "dd MMM");
 
             long now = System.currentTimeMillis();
             mCalendar.setTimeInMillis(now);
-            final float minutesRotation = mCalendar.get(Calendar.MINUTE) * 6f;
-            final float hourHandOffset = mCalendar.get(Calendar.MINUTE) / 2f;
-            final float hoursRotation = (mCalendar.get(Calendar.HOUR) * 30) + hourHandOffset;
+            final float minutesRotation = getMinuteRotation();
+            final float hoursRotation = getHourRotation();
 
-            if (!isInAmbientMode()) {
-                drawStepsCount(canvas, mStepsTotal, "###,###", "%s steps",
-                        mWidth / 2, mHeight * 0.75f, mStepCountPaint);
-            }
+            if (!isInAmbientMode()) drawStepsCount(canvas, mStepsTotal, "###,###", "%s ST",
+                    mWidth / 2, mHeight * 0.75f, detailTextPaint);
 
             updateWatchHandStyle();
 
             canvas.save();
+
 
             // Draw Hours
             drawClockHand(canvas, hoursRotation, mCenterX,
@@ -302,13 +329,28 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                     mCenterY - sMinuteHandLength,
                     mMinuteHandPaint);
 
-            if (!isInAmbientMode()) {
-                drawSweepingSecondHand(canvas, minutesRotation, mCalendar, mCenterX, mCenterY, mWidth, secondHandCenterOffsetPercent, mSecondHandLength, mSecondHandPaint);
-            }
+            Paint outerCenterCirclePaint = new Paint();
+            outerCenterCirclePaint.setColor(LIGHT_BG);
+            outerCenterCirclePaint.setAntiAlias(true);
+
+            canvas.drawCircle(mCenterX, mCenterY, 28, outerCenterCirclePaint);
+
+            canvas.drawCircle(mCenterX, mCenterY, 22, mCenterCirclePaint);
+
+            if (!isInAmbientMode()) drawSweepingSecondHand(canvas, minutesRotation, mCalendar,
+                    mCenterX, mCenterY, mWidth, secondHandCenterOffsetPercent,
+                    mSecondHandLength, mSecondHandPaint);
 
             canvas.restore();
         }
 
+        private float getHourRotation() {
+            return (mCalendar.get(Calendar.HOUR) * 30) + mCalendar.get(Calendar.MINUTE) / 2f;
+        }
+
+        private float getMinuteRotation() {
+            return mCalendar.get(Calendar.MINUTE) * 6f;
+        }
 
         private void updateTimer() {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -328,15 +370,15 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             if (isInAmbientMode()) {
                 ambientPaint(mHourHandPaint, DARK_HANDS);
                 ambientPaint(mMinuteHandPaint, DARK_HANDS);
-                ambientPaint(mSecondHandPaint, SECOND_HAND);
+                ambientPaint(mSecondHandPaint, DARK_HANDS);
                 ambientPaint(mHourTickPaint, DARK_HANDS);
-                ambientPaint(mSecondsTickPaint, DARK_HANDS);
+                ambientPaint(mMinuteTickPaint, DARK_HANDS);
             } else {
-                activePaint(mSecondHandPaint, SECOND_HAND, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-                activePaint(mHourTickPaint, mWatchHandColor, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-                activePaint(mMinuteHandPaint, mWatchHandColor, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-                activePaint(mSecondsTickPaint, mWatchHandColor, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-                activePaint(mHourHandPaint, mWatchHandColor, SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
+                activePaint(mSecondHandPaint, DARK_HANDS);
+                activePaint(mHourTickPaint, mWatchHandColor);
+                activePaint(mMinuteHandPaint, mWatchHandColor);
+                activePaint(mMinuteTickPaint, mWatchHandColor);
+                activePaint(mHourHandPaint, mWatchHandColor);
             }
         }
 
@@ -346,7 +388,7 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
             }
             mRegisteredReceiver = true;
             IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
-            OcodoWatchFaceCff.this.registerReceiver(mReceiver, filter);
+            OcodoWatchFaceVitsoe.this.registerReceiver(mReceiver, filter);
         }
 
         private void unregisterReceiver() {
@@ -354,7 +396,7 @@ public class OcodoWatchFaceCff extends CanvasWatchFaceService {
                 return;
             }
             mRegisteredReceiver = false;
-            OcodoWatchFaceCff.this.unregisterReceiver(mReceiver);
+            OcodoWatchFaceVitsoe.this.unregisterReceiver(mReceiver);
         }
 
         @Override

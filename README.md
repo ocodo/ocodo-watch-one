@@ -39,3 +39,7 @@ The following are inspired by Mondaine / CFF (Swiss Railway Clocks)
 ## ocodo six
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_six.png)
+
+## ocodo vitsoe
+
+![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_vitsoe.png)

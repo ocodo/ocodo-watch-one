@@ -250,7 +250,7 @@ public class OcodoWatchFaceSix extends CanvasWatchFaceService {
                 drawRepeatingTicks(canvas, mCenterX - 45, mCenterX - 10, tickIndex, 12, mHourTickPaint, true);
             }
 
-            // drawHourDigits(canvas);
+            drawHourDigits(canvas);
 
             drawWatchName(canvas);
 

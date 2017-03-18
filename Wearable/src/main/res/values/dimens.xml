@@ -14,4 +14,5 @@
     <dimen name="steps_or_distance_x_offset_round">25dp</dimen>
     <dimen name="y_offset">123dp</dimen>
     <dimen name="line_height">18dp</dimen>
+    <dimen name="rams_text_size">12dp</dimen>
 </resources>

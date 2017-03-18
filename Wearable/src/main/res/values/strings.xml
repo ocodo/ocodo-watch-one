@@ -11,12 +11,15 @@
     <string name="ocodo_three_logo_text">ocodo three</string>
     <string name="ocodo_watch_four_name">Ocodo Four</string>
     <string name="ocodo_four_logo_text">ocodo four</string>
-    <string name="ocodo_watch_five_name">Ocodo five</string>
+    <string name="ocodo_watch_five_name">Ocodo Five</string>
     <string name="ocodo_five_logo_text">ocodo five</string>
     <string name="ocodo_watch_cff_name">Ocodo Helvetia</string>
     <string name="ocodo_cff_logo_text">ocodo helvetia</string>
     <string name="ocodo_watch_six_name">Ocodo Six</string>
     <string name="ocodo_six_logo_text">ocodo six</string>
+    <string name="ocodo_watch_vitsoe_name">Ocodo Vitsœ</string>
+    <string name="ocodo_vitsoe_logo_text">OCODO</string>
+    <string name="ocodo_vitsoe_quartz_text">quartz</string>
     <string name="am_text">am</string>
     <string name="pm_text">pm</string>
     <string name="steps_text">%s steps</string>
@@ -24,9 +27,8 @@
     <string name="three">3</string>
     <string name="six">6</string>
     <string name="nine">9</string>
-    <string name="roman_twelve">12</string>
-    <string name="roman_three">3</string>
-    <string name="roman_six">6</string>
-    <string name="roman_nine">9</string>
-
+    <string name="roman_twelve">XII</string>
+    <string name="roman_three">III</string>
+    <string name="roman_six">VI</string>
+    <string name="roman_nine">IX</string>
 </resources>
