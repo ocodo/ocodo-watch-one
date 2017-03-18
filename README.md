@@ -40,6 +40,8 @@ The following are inspired by Mondaine / CFF (Swiss Railway Clocks)
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_six.png)
 
+Inspired by Dieter Rams (Braun) clock designs
+
 ## ocodo vitsoe
 
 ![](./Wearable/src/main/res/drawable-hdpi/preview_ocodo_vitsoe.png)
