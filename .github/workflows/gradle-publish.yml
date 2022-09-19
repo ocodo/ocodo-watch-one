@@ -30,13 +30,5 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
     - name: Build Android release APK when create new tag
       uses: kyze8439690/action-release-releaseapk@1.0.0
-
-    # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
-    # the publishing section of your build.gradle
-    - name: Publish to GitHub Packages
-      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-      with:
-        arguments: publish
       env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
