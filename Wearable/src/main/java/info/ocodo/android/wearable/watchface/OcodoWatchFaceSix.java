@@ -40,6 +40,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.activePaint;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.ambientPaint;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.createStrokePaint;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.createTextPaint;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawClockHand;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawDayMonthDate;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawRepeatingTextDigits;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawRepeatingTicks;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawStepsCount;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawWatchName;
+import static info.ocodo.android.wearable.watchface.OcodoWatchFaceUtils.drawSweepingSecondHand;
+
 import static info.ocodo.android.wearable.watchface.R.dimen;
 import static info.ocodo.android.wearable.watchface.R.string;
 import static java.lang.String.format;
@@ -252,9 +264,7 @@ public class OcodoWatchFaceSix extends CanvasWatchFaceService {
                 drawRepeatingTicks(canvas, mCenterX - 45, mCenterX - 10, tickIndex, 12, mHourTickPaint, true);
             }
 
-            // drawHourDigits(canvas);
-
-            drawWatchName(canvas);
+            drawWatchName(canvas, getString(string.ocodo_six_logo_text), ocodoTextYOffset, mWidth / 2, mOcodoTextPaint
 
             drawDayMonthDate(canvas);
 
@@ -290,36 +300,6 @@ public class OcodoWatchFaceSix extends CanvasWatchFaceService {
             canvas.drawText(date, mWidth / 2, mDateOffsetY, mStepCountPaint);
         }
 
-        private void drawDayMonthDate(Canvas canvas) {
-            @SuppressLint("SimpleDateFormat")
-            String date = new SimpleDateFormat("dd MMM").format(new Date()).toUpperCase();
-            float mDateOffsetY = mHeight * 0.73f;
-            canvas.drawText(date, mWidth / 2, mDateOffsetY, mOcodoTextPaint);
-        }
-
-        private void drawStepsCount(Canvas canvas) {
-            if (!isInAmbientMode()) {
-                DecimalFormat df = new DecimalFormat("###,###");
-                String stepString = getString(string.steps_text, df.format(mStepsTotal));
-                float stepsYOffset = mHeight * 0.80f;
-                canvas.drawText(stepString, mWidth / 2, stepsYOffset, mStepCountPaint);
-            }
-        }
-
-        private void drawSweepingSecondHand(Canvas canvas, float minutesRotation) {
-            if (!isInAmbientMode()) {
-                final float milliseconds = ((mCalendar.get(Calendar.SECOND) * 1000) +
-                        mCalendar.get(Calendar.MILLISECOND));
-                final float secondsRotation = milliseconds * 0.006f;
-
-                drawClockHand(canvas, secondsRotation - minutesRotation, mCenterX,
-                        mCenterY,
-                        mCenterY - ((mWidth / 2) * secondHandCenterOffsetPercent),
-                        mCenterY - mSecondHandLength,
-                        mSecondHandPaint);
-            }
-        }
-
         private void drawHours(Canvas canvas, float hoursRotation) {
             drawClockHand(canvas, hoursRotation, mCenterX,
                     mCenterY,
@@ -340,17 +320,6 @@ public class OcodoWatchFaceSix extends CanvasWatchFaceService {
             return format("%02d", hour);
         }
 
-        private void drawClockHand(Canvas canvas, float hoursRotation, float mCenterX, float mCenterY,
-                                   float startY, float stopY, Paint mHourHandPaint) {
-            canvas.rotate(hoursRotation, mCenterX, mCenterY);
-            canvas.drawLine(
-                    mCenterX,
-                    startY,
-                    mCenterX,
-                    stopY,
-                    mHourHandPaint);
-        }
-
         private void drawHourDigits(Canvas canvas) {
             String[] textItems = new String[]{
                     getResources().getString(string.twelve),
@@ -364,34 +333,6 @@ public class OcodoWatchFaceSix extends CanvasWatchFaceService {
                         digitIndex, 4,
                         mHourTextPaint, true);
             }
-        }
-
-        private void drawRepeatingTicks(Canvas canvas, float innerRadius, float outerRadius,
-                                        int index, int count, Paint paint, boolean predicate) {
-            float tickRot = (float) (index * Math.PI * 2 / count);
-            float innerX = (float) Math.sin(tickRot) * innerRadius;
-            float innerY = (float) -Math.cos(tickRot) * innerRadius;
-            float outerX = (float) Math.sin(tickRot) * outerRadius;
-            float outerY = (float) -Math.cos(tickRot) * outerRadius;
-            if (predicate) {
-                canvas.drawLine(
-                        mCenterX + innerX,
-                        mCenterY + innerY,
-                        mCenterX + outerX,
-                        mCenterY + outerY,
-                        paint
-                );
-            }
-        }
-
-        private void drawRepeatingText(String text, Canvas canvas, float offset, int index,
-                                       int count, Paint paint, boolean predicate) {
-            float tickRot = (float) (index * Math.PI * 2 / count);
-            float innerX = (float) Math.sin(tickRot) * offset;
-            float innerY = (float) -Math.cos(tickRot) * offset;
-            float x = (mCenterX + innerX);
-            float y = (mCenterY + innerY) - (paint.ascent() * 0.38f);
-            if (predicate) canvas.drawText(text, x, y, paint);
         }
 
         private void updateTimer() {
@@ -422,37 +363,6 @@ public class OcodoWatchFaceSix extends CanvasWatchFaceService {
                 activePaint(mSecondsTickPaint, mWatchHandColor);
                 activePaint(mHourHandPaint, mWatchHandColor);
             }
-        }
-
-        private void ambientPaint(Paint p, int color) {
-            p.setColor(color);
-            p.setAntiAlias(false);
-            p.clearShadowLayer();
-        }
-
-        private void activePaint(Paint p, int color) {
-            p.setColor(color);
-            p.setAntiAlias(true);
-            p.setShadowLayer(SHADOW_RADIUS, 1.0f, 1.0f, mWatchHandShadowColor);
-        }
-
-        private Paint createTextPaint(int color, Typeface typeface) {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            paint.setTypeface(typeface);
-            paint.setAntiAlias(true);
-            return paint;
-        }
-
-        private Paint createStrokePaint(int color, float strokeWidth, Paint.Style style,
-                                        int shadowRadius, float dx, float dy, int shadowColor) {
-            Paint paint = new Paint();
-            paint.setColor(color);
-            paint.setStrokeWidth(strokeWidth);
-            paint.setAntiAlias(true);
-            paint.setStyle(style);
-            paint.setShadowLayer(shadowRadius, dx, dy, shadowColor);
-            return paint;
         }
 
         private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
